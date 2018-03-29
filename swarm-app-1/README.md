@@ -42,3 +42,14 @@
     - so run on a high port of your choosing (I choose 5001), container listens on 80
     - on backend network
     - 1 replica
+
+```
+docker network create --driver overlay backend
+docker network create --driver overlay frontend
+
+docker service create --name vote --network frontend --replicas 2 -p 80:80 dockersamples/examplevotingapp_vote:before
+docker service create --name redis --network frontend --replicas 1 redis:3.2
+docker service create --name worker --network frontend --network backend --replicas 1 dockersamples/examplevotingapp_worker
+docker service create --name db --network backend --replicas 1 --mount type=volume,source=db-data,target=/var/lib/postgresql/data postgres:9.4
+docker service create --name result --network backend --replicas 1 -p 5001:80 dockersamples/examplevotingapp_result:before
+```
